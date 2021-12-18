@@ -123,22 +123,21 @@ export default function BracketView({ players }) {
   stageNames.push('Semi-Finals')
   stageNames.push('Finals')
 
-  const stageMatches = []
+  const matchesByStage = []
   const stage1 = []
   for(let i = 0; i < players.length; i+=2) {
     stage1.push([players[i], players[i+1]])
   }
-  stageMatches.push(stage1)
+  matchesByStage.push(stage1)
 
   for(let i = 1; i < stageCount; i++) {
     let stage = []
     for(let j = 0; j < Math.floor(players.length / (i*2)); j+=2) {
       stage.push([{ name: '' }, { name: '' }])
     }
-    stageMatches.push(stage);
+    matchesByStage.push(stage);
   }
 
-  console.log(stageMatches)
   return (
     <div className='m-2 m-1000'>
       {/* Column Headers */}
@@ -149,7 +148,7 @@ export default function BracketView({ players }) {
       <div className={`grid ${gappedGridCols[stageCount]} ${gridRows[players.length]}`}>
         {/* Render Matches */}
         {
-          stageMatches.map((matches, stageIndex) => matches.map((match, matchIndex) => (
+          matchesByStage.map((matches, stageIndex) => matches.map((match, matchIndex) => (
             /* 
              * These col-start and row-start calculations put each stage in a new column, and position
              * the Matches so they're centered relative to the matches they're connected to. The fact that
@@ -190,7 +189,7 @@ export default function BracketView({ players }) {
         }
         {/* Render SquareForks */}
         {
-          stageMatches.map((matches, stageIndex) => {
+          matchesByStage.map((matches, stageIndex) => {
             if(stageIndex === 0) return; //This is going to render the forks to the left of the matches, the first column doesn't need that
             return matches.map((match, matchIndex) => (
               /*
