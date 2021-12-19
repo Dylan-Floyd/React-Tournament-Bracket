@@ -3,7 +3,7 @@ import React from 'react'
 export default function Match({ players }) {
   const [player1, player2] = players
   return (
-    <div className='grid grid-rows-2 grid-cols-6 bg-slate-600 rounded-md text-sm'>
+    <div className='grid grid-rows-2 grid-cols-6 bg-slate-500 rounded-md text-sm'>
       <div className='col-start-1 col-span-1 row-start-1 row-span-1 bg-slate-400 border-b border-black rounded-tl-md p-2'>{player1?.seed ?? '?'}</div>
       <div className='col-start-2 col-span-full row-start-1 row-span-1 text-white border-b border-black text-left p-2'>{player1?.name ?? '???'}</div>
 

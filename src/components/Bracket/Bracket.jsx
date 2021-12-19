@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import Match from '../components/Match/Match.jsx'
-import SquareFork from '../components/SquareFork/SquareFork.jsx'
-import sortBySeeds from '../utils/sortBySeeds.js'
+import Match from '../Match/Match.jsx'
+import SquareFork from '../SquareFork/SquareFork.jsx'
+import sortBySeeds from '../../utils/sortBySeeds.js'
 
-export default function BracketView({ players }) {
+export default function Bracket({ players }) {
   const [sortedPlayers, setSortedPlayers] = useState([])
   const [stages, setStages] = useState([])
   const [stageNames, setStageNames] = useState([])
@@ -69,7 +69,7 @@ export default function BracketView({ players }) {
     <div className='m-2 m-1000'>
       {/* Column Headers */}
       <div className={`grid ${gridCols[stages.length]} grid-rows-1`}>
-        {stageNames.map(name => <div className='bg-slate-600 text-white m-px p-1'>{name}</div>)}
+        {stageNames.map((name, i) => <div className='bg-slate-500 text-white m-px p-1' key={`h${i}`}>{name}</div>)}
       </div>
       {/* Bracket */}
       <div className={`grid ${gappedGridCols[stages.length]} ${gridRows[sortedPlayers.length]}`}>
@@ -109,23 +109,23 @@ export default function BracketView({ players }) {
              * The offset for row-start is 2**stageIndex (it scales as 1, 2, 4, 8)
              * The scalar for row-start is 2**(stageIndex+1)*matchIndex
              */
-            <div className={`col-start-${2+stageIndex*2} col-span-1 m-4 row-start-${2**stageIndex + 2**(stageIndex+1)*(matchIndex)} row-span-2`} key={`m${stageIndex}-${matchIndex}`}>
-              <Match players={[match[0], match[1]]} />
+            <div className={`col-start-${2+stageIndex*2} col-span-1 m-4 row-start-${2**stageIndex + 2**(stageIndex+1)*(matchIndex)} row-span-2`} key={`dm${stageIndex}-${matchIndex}`}>
+              <Match players={[match[0], match[1]]} key={`m${stageIndex}-${matchIndex}`}/>
             </div>
           )))
         }
         {/* Render SquareForks */}
         {
           stages.map((matches, stageIndex) => {
-            if(stageIndex === 0) return <></>; //This is going to render the forks to the left of the matches, the first column doesn't need that
+            if(stageIndex === 0) return ''; //This is going to render the forks to the left of the matches, the first column doesn't need that
             return matches.map((match, matchIndex) => (
               /*
                * This should be fairly similar to the last algorithm
                *
                * It was, I threw +1s and -1s at it until it worked.
                */
-               <div className={`col-start-${1+stageIndex*2} col-span-1 row-start-${2**(stageIndex-1)+1 + 2**(stageIndex+1)*(matchIndex) } row-span-${2**(stageIndex)}`} key={`f${stageIndex}-${matchIndex}`}>
-                <SquareFork />
+               <div className={`col-start-${1+stageIndex*2} col-span-1 row-start-${2**(stageIndex-1)+1 + 2**(stageIndex+1)*(matchIndex) } row-span-${2**(stageIndex)}`} key={`df${stageIndex}-${matchIndex}`}>
+                <SquareFork key={`f${stageIndex}-${matchIndex}`}/>
               </div>
             ))
           })
