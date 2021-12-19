@@ -1,9 +1,141 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Match from '../components/Match/Match.jsx'
 import SquareFork from '../components/SquareFork/SquareFork.jsx'
+import sortBySeeds from '../utils/sortBySeeds.js'
 
+export default function BracketView({ players }) {
+  const [sortedPlayers, setSortedPlayers] = useState([])
+  const [stages, setStages] = useState([])
+  const [stageNames, setStageNames] = useState([])
 
-//These consts ensure tailwind won't purge the css classes
+  useEffect(() => {
+    // To start with, the number of players can only be 2, 4, 8, 16 because idk how a bracket should work when the tree gets uneven
+    const newPlayers = players ?? [
+      { seed: 1, name: 'bob1' },
+      { seed: 2, name: 'bob2' },
+      { seed: 3, name: 'bob3' },
+      { seed: 4, name: 'bob4' },
+      { seed: 5, name: 'bob5' },
+      { seed: 6, name: 'bob6' },
+      { seed: 7, name: 'bob7' },
+      { seed: 8, name: 'bob8' },
+      { seed: 9, name: 'bob9' },
+      { seed: 10, name: 'bob10' },
+      { seed: 11, name: 'bob11' },
+      { seed: 12, name: 'bob12' },
+      { seed: 13, name: 'bob13' },
+      { seed: 14, name: 'bob14' },
+      { seed: 15, name: 'bob15' },
+      { seed: 16, name: 'bob16' },
+    ];
+
+    // Arrange the players so the highest seeds face the lowest seeds
+    setSortedPlayers(sortBySeeds(newPlayers))
+  }, [players])
+
+  useEffect(() => {
+    const stageCount = Math.log2(sortedPlayers.length)
+  
+    // Create the stage/column names
+    const stageNames = []
+    for(let i = 0; i < stageCount - 2; i++) {
+      stageNames.push(`Stage ${i+1}`)
+    }
+    stageNames.push('Semi-Finals')
+    stageNames.push('Finals')
+    setStageNames(stageNames)
+  
+    // Creates an array of stages, each stage has an array of matches, and each match is an array of two players
+    const matchesByStage = []
+    // For stage 1, just put every two players in an array, and put those arrays into an array
+    const stage1 = []
+    for(let i = 0; i < sortedPlayers.length; i+=2) {
+      stage1.push([sortedPlayers[i], sortedPlayers[i+1]])
+    }
+    matchesByStage.push(stage1)
+  
+    // For the rest of the stages, make the appropriate amount of empty matches
+    for(let i = 1; i < stageCount; i++) {
+      let stage = []
+      for(let j = 0; j < Math.floor(sortedPlayers.length / (i*2)); j+=2) {
+        stage.push([{ name: '' }, { name: '' }])
+      }
+      matchesByStage.push(stage);
+    }
+    setStages(matchesByStage)
+  }, [sortedPlayers])
+
+  return (
+    <div className='m-2 m-1000'>
+      {/* Column Headers */}
+      <div className={`grid ${gridCols[stages.length]} grid-rows-1`}>
+        {stageNames.map(name => <div className='bg-slate-600 text-white m-px p-1'>{name}</div>)}
+      </div>
+      {/* Bracket */}
+      <div className={`grid ${gappedGridCols[stages.length]} ${gridRows[sortedPlayers.length]}`}>
+        {/* Render Matches */}
+        {
+          stages.map((matches, stageIndex) => matches.map((match, matchIndex) => (
+            /* 
+             * These col-start and row-start calculations put each stage in a new column, and position
+             * the Matches so they're centered relative to the matches they're connected to. The fact that
+             * css grids count from one make this sort of complicated.
+             * Note that every match column has two thin columns next to it (for the SquareForks), so there are 2x+1 grid columns, where x
+             * is the number of stages, and each Match takes up two rows, so there's 2y grid rows, where y is the maximum number of matches in a stage
+             * 
+             *
+             * If stage one has 8 matches (16 players):
+             * For stage 1: it should start in col-2 and row-1, adding a match to every 2nd row
+             * For stage 2, it should start in col 4 and row 2, adding a match to every 4th row.
+             * For stage 3, it should start in col 6 and row 4, adding a match to every 8th row.
+             * For stage 4, it should start in col 8 and row 8, adding a match to every 16th row.
+             *
+             * So the offset for col-start is 2 (it starts in 2)
+             * The scalar for col-start is stageIndex*2 (For the column labeled 'Stage 1' stageIndex will be 0, so 2+stageIndex*2 is 2)
+
+             * row start is the hard part, so im gonna make a table:
+             * stageIndex  |  matchIndex  |  row-start
+             *     0              0              1
+             *     0              1              3
+             *     0              2              5
+             *     0              3              7
+             *     0              4              9
+             *     1              0              2
+             *     1              1              6
+             *     1              2              10
+             *     1              3              14
+             *     1              4              18
+             *
+             * The offset for row-start is 2**stageIndex (it scales as 1, 2, 4, 8)
+             * The scalar for row-start is 2**(stageIndex+1)*matchIndex
+             */
+            <div className={`col-start-${2+stageIndex*2} col-span-1 m-4 row-start-${2**stageIndex + 2**(stageIndex+1)*(matchIndex)} row-span-2`} key={`m${stageIndex}-${matchIndex}`}>
+              <Match players={[match[0], match[1]]} />
+            </div>
+          )))
+        }
+        {/* Render SquareForks */}
+        {
+          stages.map((matches, stageIndex) => {
+            if(stageIndex === 0) return <></>; //This is going to render the forks to the left of the matches, the first column doesn't need that
+            return matches.map((match, matchIndex) => (
+              /*
+               * This should be fairly similar to the last algorithm
+               *
+               * It was, I threw +1s and -1s at it until it worked.
+               */
+               <div className={`col-start-${1+stageIndex*2} col-span-1 row-start-${2**(stageIndex-1)+1 + 2**(stageIndex+1)*(matchIndex) } row-span-${2**(stageIndex)}`} key={`f${stageIndex}-${matchIndex}`}>
+                <SquareFork />
+              </div>
+            ))
+          })
+        }
+      </div>
+    </div>
+  )
+}
+
+// These consts ensure tailwind won't purge the css classes
 const gridCols = {
   1: 'grid-cols-1',
   2: 'grid-cols-2',
@@ -41,6 +173,7 @@ const gridRows = {
   16: 'grid-rows-16',
 }
 
+// eslint-disable-next-line no-unused-vars
 const rowStart = {
   1: 'row-start-1',
   2: 'row-start-2',
@@ -60,6 +193,7 @@ const rowStart = {
   16: 'row-start-16',
 }
 
+// eslint-disable-next-line no-unused-vars
 const colStart = {
   1: 'col-start-1',
   2: 'col-start-2',
@@ -79,6 +213,7 @@ const colStart = {
   16: 'col-start-16',
 }
 
+// eslint-disable-next-line no-unused-vars
 const rowSpan = {
   1: 'row-span-1',
   2: 'row-span-2',
@@ -92,118 +227,4 @@ const rowSpan = {
   10: 'row-span-10',
   11: 'row-span-11',
   12: 'row-span-12'
-}
-
-export default function BracketView({ players }) {
-  //to start with, the number of teams can only be 2, 4, 8, 16 because idk how a bracket should work when the tree gets uneven
-  players = players ?? [
-    { seed: 1, name: 'bob1' },
-    { seed: 2, name: 'bob2' },
-    { seed: 3, name: 'bob3' },
-    { seed: 4, name: 'bob4' },
-    { seed: 5, name: 'bob5' },
-    { seed: 6, name: 'bob6' },
-    { seed: 7, name: 'bob7' },
-    { seed: 8, name: 'bob8' },
-    { seed: 9, name: 'bob9' },
-    { seed: 10, name: 'bob10' },
-    { seed: 11, name: 'bob11' },
-    { seed: 12, name: 'bob12' },
-    { seed: 13, name: 'bob13' },
-    { seed: 14, name: 'bob14' },
-    { seed: 15, name: 'bob15' },
-    { seed: 16, name: 'bob16' },
-  ]; //added for testing
-
-  const stageCount = Math.log2(players.length)
-  const stageNames = []
-  for(let i = 0; i < stageCount - 2; i++) {
-    stageNames.push(`Stage ${i+1}`)
-  }
-  stageNames.push('Semi-Finals')
-  stageNames.push('Finals')
-
-  const matchesByStage = []
-  const stage1 = []
-  for(let i = 0; i < players.length; i+=2) {
-    stage1.push([players[i], players[i+1]])
-  }
-  matchesByStage.push(stage1)
-
-  for(let i = 1; i < stageCount; i++) {
-    let stage = []
-    for(let j = 0; j < Math.floor(players.length / (i*2)); j+=2) {
-      stage.push([{ name: '' }, { name: '' }])
-    }
-    matchesByStage.push(stage);
-  }
-
-  return (
-    <div className='m-2 m-1000'>
-      {/* Column Headers */}
-      <div className={`grid ${gridCols[stageCount]} grid-rows-1`}>
-        {stageNames.map(name => <div className='bg-slate-600 text-white m-px p-1'>{name}</div>)}
-      </div>
-      {/* Bracket */}
-      <div className={`grid ${gappedGridCols[stageCount]} ${gridRows[players.length]}`}>
-        {/* Render Matches */}
-        {
-          matchesByStage.map((matches, stageIndex) => matches.map((match, matchIndex) => (
-            /* 
-             * These col-start and row-start calculations put each stage in a new column, and position
-             * the Matches so they're centered relative to the matches they're connected to. The fact that
-             * css grids count from one make this sort of complicated.
-             * Note that every match column has two thin columns next to it (for the SquareForks), so there are 2x+1 grid columns, where x
-             * is the number of stages, and each Match takes up two rows, so there's 2y grid rows, where y is the maximum number of matches in a stage
-             * 
-             *
-             * If stage one has 8 matches (16 players):
-             * For stage 1: it should start in col-2 and row-1, adding a match to every 2nd row
-             * For stage 2, it should start in col 4 and row 2, adding a match to every 4th row.
-             * For stage 3, it should start in col 6 and row 4, adding a match to every 8th row.
-             * For stage 4, it should start in col 8 and row 8, adding a match to every 16th row.
-             *
-             * So the offset for col-start is 2 (it starts in 2)
-             * The scalar for col-start is stageIndex*2 (For the column labeled 'Stage 1' stageIndex will be 0, so 2+stageIndex*2 is 2)
-
-             * row start is the hard part, so im gonna make a table:
-             * stageIndex  |  matchIndex  |  row-start
-             *     0              0              1
-             *     0              1              3
-             *     0              2              5
-             *     0              3              7
-             *     0              4              9
-             *     1              0              2
-             *     1              1              6
-             *     1              2              10
-             *     1              3              14
-             *     1              4              18
-             *
-             * The offset for row-start is 2**stageIndex (it scales as 1, 2, 4, 8)
-             * The scalar for row-start is 2**(stageIndex+1)*matchIndex
-             */
-            <div className={`col-start-${2+stageIndex*2} col-span-1 m-4 row-start-${2**stageIndex + 2**(stageIndex+1)*(matchIndex)} row-span-2`}>
-              <Match players={[match[0], match[1]]} />
-            </div>
-          )))
-        }
-        {/* Render SquareForks */}
-        {
-          matchesByStage.map((matches, stageIndex) => {
-            if(stageIndex === 0) return; //This is going to render the forks to the left of the matches, the first column doesn't need that
-            return matches.map((match, matchIndex) => (
-              /*
-               * This should be fairly similar to the last algorithm
-               *
-               * It was, I threw +1s and -1s at it until it worked.
-               */
-               <div className={`col-start-${1+stageIndex*2} col-span-1 row-start-${2**(stageIndex-1)+1 + 2**(stageIndex+1)*(matchIndex) } row-span-${2**(stageIndex)}`}>
-                <SquareFork />
-              </div>
-            ))
-          })
-        }
-      </div>
-    </div>
-  )
 }
