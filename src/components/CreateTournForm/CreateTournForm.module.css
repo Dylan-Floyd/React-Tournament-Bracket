@@ -1,0 +1,23 @@
+.form {
+  background-color: rgb(100, 116, 139);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem 2rem;
+}
+
+.form > label {
+  margin: 0.5rem;
+}
+
+.form input, .form textarea {
+  background-color: rgb(51, 65, 85);
+  color: white;
+  border-radius: 6px;
+  width: 250px;
+  padding: 8px;
+  margin: 4px;
+  line-height: 24px;
+}

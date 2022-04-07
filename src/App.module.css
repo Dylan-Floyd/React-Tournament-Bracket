@@ -1,0 +1,15 @@
+.app {
+  min-height: 100vh;
+  background-color: #475569;
+  color: white;
+  display: flex;
+  flex-direction: column;
+}
+
+.app > main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+}

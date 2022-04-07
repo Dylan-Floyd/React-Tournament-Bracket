@@ -1,0 +1,11 @@
+.headers {
+  display: grid;
+  grid-template-rows: 1fr;
+}
+
+.header {
+  background-color: #64748b;
+  color: white;
+  padding: 0.25rem;
+  margin: 1px;
+}

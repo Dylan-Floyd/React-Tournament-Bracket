@@ -1,0 +1,18 @@
+.coloredButton {
+  background-color: rgb(96, 165, 250);
+  border-color: rgb(37, 99, 235);
+  color: white;
+  border-bottom-width: 2px;
+  padding: 0.5rem;
+  margin: 0.25rem;
+  border-radius: 0.25rem;
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.coloredButton:active {
+  transform: translateY(1px);
+  margin-top: 6px;
+  border-bottom-width: 0px;
+}

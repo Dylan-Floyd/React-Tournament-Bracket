@@ -1,7 +1,7 @@
 
 /*
  * Matches the highest seeded player against the lowest seeded player,
- * and the second highest seeded player against the second lowest seeded player, and so forth
+ * the second highest seeded player against the second lowest seeded player, and so forth
  * 
  */
 export default function sortBySeeds(players) {
