@@ -1,0 +1,9 @@
+.bracket {
+  margin: .25rem;
+  min-width: 1000px;
+}
+
+.matchContainer {
+  margin: 1rem;
+  grid-row: span 2 / span 2;
+}

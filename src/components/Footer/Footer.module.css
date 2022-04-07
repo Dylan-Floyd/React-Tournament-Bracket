@@ -1,0 +1,11 @@
+.footer {
+  background-color: rgb(51, 65, 85);
+  color: rgb(148, 163, 184);
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  padding: 0.25rem 1rem;
+}
